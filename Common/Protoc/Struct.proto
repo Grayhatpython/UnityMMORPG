@@ -1,0 +1,70 @@
+syntax = "proto3";
+package Protocol;
+
+import "Enum.proto";
+
+//	DB ID
+//	InGame ID
+//	DataSheet ID
+
+//	Game Server < - > Game Client
+message RoomInfo 
+{
+	int32 roomId = 1;
+	int32 mapId = 2;
+}
+
+message StatInfo 
+{
+	int32 level = 1;
+	int32 hp = 2;
+	int32 maxHp = 3;
+	float speed = 4;
+	int32 attack = 5;
+	int32 defence = 6;
+	int32 exp = 7;
+	int32 totalExp = 8;
+}
+
+message PositionInfo 
+{
+	ActorState state = 1;
+	MoveDir moveDir = 2;
+	int32 posX = 3;
+	int32 posY = 4;
+}
+
+message ActorInfo 
+{
+	int32 actorId = 1;
+	PositionInfo posInfo = 2;  
+}
+
+message CreatureInfo 
+{
+	ActorInfo actorInfo = 1;
+	StatInfo statInfo = 2;
+	int32 stateFlag = 3;
+}
+
+message PlayerInfo
+{
+	CreatureInfo creatureInfo = 1;
+	string name = 2;
+}
+
+message MyPlayerInfo
+{
+	PlayerInfo playerInfo = 1;
+	StatInfo baseStatInfo = 2;
+}
+
+
+//	Monitoring Server < - > Game Server
+message CpuInfo
+{
+	ServerType	serverType = 1;
+	float		cpuUsage = 2;
+	int64		timestamp = 3;
+	string		serverName = 4;
+}

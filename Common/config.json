@@ -1,0 +1,6 @@
+{
+  "ip": "127.0.0.1",
+  "port": "7777",
+  "dataPath": "../Common/Data",
+  "connectionString": "Driver={ODBC Driver 17 for SQL Server};server=DESKTOP-3O8GGTF\\SQLEXPRESS;database=GameServerDB;trusted_connection=Yes;"
+}

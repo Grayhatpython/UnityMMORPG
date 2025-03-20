@@ -1,0 +1,54 @@
+syntax = "proto3";
+package Protocol;
+
+import "Enum.proto";
+import "Struct.proto";
+
+option csharp_namespace = "Google.Protobuf.Protocol";
+
+message S_CONNECTED
+{
+
+}
+
+message C_ENTERGAME
+{
+}
+
+message S_ENTERGAME 
+{
+	MyPlayerInfo myPlayerInfo = 1;
+	bool respawn = 2;
+}
+
+message S_LEAVEGAME
+{
+
+}
+
+message S_SPAWN
+{
+	repeated PlayerInfo players = 1;
+}
+
+message S_DESPAWN 
+{
+	repeated int32 actorIds = 1;
+}
+
+message C_MOVE
+{
+	PositionInfo posInfo = 1;
+}
+
+message S_MOVE 
+{
+	int32 actorId = 1;
+	PositionInfo posInfo = 2;
+}
+
+
+message S_CPUINFO
+{
+	CpuInfo cpuInfo = 1;
+}

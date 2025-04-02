@@ -3,47 +3,56 @@
 
 void Lock::WriteLock()
 {
-	//	ÇöÀç WriteLockÀ» Àâ°í ÀÖ´Â ThreadId¸¦ È®ÀÎ
+	//	í˜„ì¬ WriteLockì„ ë“¤ê³  ìˆëŠ” ThreadId í™•ì¸
 	auto threadId = _ownerThreadId.load();
+	//	ìŠ¤í•€ ì¹´ìš´íŠ¸ ì´ˆê¸°í™”
+	LThreadSpinCount.spinCount = INITIAL_SPIN_COUNT;
 
-	//	ÇöÀç WriteLockÀ» Àâ°í ÀÖ´Â ThreadId¿Í Áö±İ WriteLockÀ» ÇÏ´Â ThreadId°¡ °°À¸¸é Åë°ú
-	//	ÁßÃ¸ Lock Ä«¿îÆ® Áõ°¡
+	//	í˜„ì¬ WriteLockì„ ë“¤ê³  ìˆëŠ” ThreadIdì™€ WriteLockì„ ì‹œë„í•˜ëŠ” ThreadIdê°€ ê°™ì€ ê²½ìš°
+	//	ì¤‘ì²© Lock ì¹´ìš´íŠ¸ ì¦ê°€
 	if (threadId == LThreadId)
 	{
 		_nestedCount.fetch_add(1);
 		return;
 	}
 
-	//	Áö±İ È£ÃâÇÑ Thread°¡ ¾Æ´Ñ ´Ù¸¥ Thread°¡ WriteLockÀ» °É°í ÀÖ´Â °æ¿ì
+	//	ë‹¤ë¥¸ Threadê°€ WriteLockì„ ë“¤ê³  ìˆëŠ” ê²½ìš°
 	while (true)
 	{
 		uint32 expected = EMPTY_OWNER_THREAD_ID;
 		if (_ownerThreadId.compare_exchange_strong(OUT expected, LThreadId))
 		{
-			//	Áö±İ È£ÃâÇÑ Thread°¡ WriteLock
+			//	í˜„ì¬ í˜¸ì¶œí•œ Threadê°€ WriteLock
 			::AcquireSRWLockExclusive(&_lock);
-			//	È£ÃâÇÑ ThreadId¸¦ ownerThreadId¿¡ ÀúÀå
+			//	í˜¸ì¶œí•œ ThreadIdë¥¼ ownerThreadIdì— ì €ì¥
 			_ownerThreadId.store(LThreadId);
-			//	ÁßÃ¸ Lock Ä«¿îÆ® Áõ°¡
+			//	ì¤‘ì²© Lock ì¹´ìš´íŠ¸ ì¦ê°€
 			_nestedCount.fetch_add(1);
 			return;
 		}
 
-		for (auto i = 0; i < LOCK_SPIN_COUNT; i++)
+		//	ìŠ¤ë ˆë“œë³„ ìŠ¤í•€ ì¹´ìš´íŠ¸ ì‚¬ìš©
+		uint32 spinCount = LThreadSpinCount.spinCount;
+		for (uint32 i = 0; i < spinCount; i++)
 		{
 			YieldProcessor();
-			//std::this_thread::yield();
+		}
+
+		//	ìŠ¤í•€ ì¹´ìš´íŠ¸ë¥¼ ì ì§„ì ìœ¼ë¡œ ì¦ê°€
+		if (spinCount < MAX_SPIN_COUNT)
+		{
+			LThreadSpinCount.spinCount = spinCount * 2;
 		}
 	}
 }
 
 void Lock::WriteUnLock()
 {
-	//	ÇöÀç WriteLockÀ» Àâ°í ÀÖ´Â ThreadId¸¦ È®ÀÎ
+	//	í˜„ì¬ WriteLockì„ ë“¤ê³  ìˆëŠ” ThreadId í™•ì¸
 	auto threadId = _ownerThreadId.load();
 
-	//	ÇöÀç WriteLockÀ» Àâ°í ÀÖ´Â ThreadId¿Í Áö±İ WriteLockÀ» ÇÏ´Â ThreadId°¡ °°À¸¸é Åë°ú
-	//	ÁßÃ¸ Lock Ä«¿îÆ® Áõ°¡
+	//	í˜„ì¬ WriteLockì„ ë“¤ê³  ìˆëŠ” ThreadIdì™€ WriteLockì„ ì‹œë„í•˜ëŠ” ThreadIdê°€ ê°™ì€ ê²½ìš°
+	//	ì¤‘ì²© Lock ì¹´ìš´íŠ¸ ê°ì†Œ
 	if (threadId == LThreadId)
 	{
 		auto prevCount = _nestedCount.fetch_sub(1);

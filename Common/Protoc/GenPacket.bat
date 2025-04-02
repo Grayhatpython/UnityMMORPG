@@ -32,13 +32,13 @@ XCOPY /Y Struct.cs "../../GameClient/Assets/Scripts/Packet"
 XCOPY /Y Protocol.cs  "../../GameClient/Assets/Scripts/Packet"
 XCOPY /Y ServerPacketManager.cs "../../GameClient/Assets/Scripts/Packet"
 
-XCOPY /Y Enum.pb.h "../../MonitoringServer/src"
-XCOPY /Y Enum.pb.cc "../../MonitoringServer/src"
-XCOPY /Y Struct.pb.h "../../MonitoringServer/src"
-XCOPY /Y Struct.pb.cc "../../MonitoringServer/src"
-XCOPY /Y Protocol.pb.h "../../MonitoringServer/src"
-XCOPY /Y Protocol.pb.cc "../../MonitoringServer/src"
-XCOPY /Y ServerPacketHandler.h "../../MonitoringServer/src"
+XCOPY /Y Enum.pb.h "../../MonitoringServer"
+XCOPY /Y Enum.pb.cc "../../MonitoringServer"
+XCOPY /Y Struct.pb.h "../../MonitoringServer"
+XCOPY /Y Struct.pb.cc "../../MonitoringServer"
+XCOPY /Y Protocol.pb.h "../../MonitoringServer"
+XCOPY /Y Protocol.pb.cc "../../MonitoringServer"
+XCOPY /Y ClientPacketHandler.h "../../MonitoringServer"
 
 DEL /Q /F *.pb.h
 DEL /Q /F *.pb.cc

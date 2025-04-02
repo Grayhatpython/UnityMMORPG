@@ -1,12 +1,19 @@
 #pragma once
 #include "Types.h"
 
+struct ThreadSpinCount
+{
+	uint32 spinCount = 0;
+	uint32 maxSpinCount = 1024;
+};
+
 class Lock
 {
 	enum
 	{
 		EMPTY_OWNER_THREAD_ID = 0,
-		LOCK_SPIN_COUNT = 1024,
+		INITIAL_SPIN_COUNT = 64,
+		MAX_SPIN_COUNT = 1024,
 	};
 
 public:

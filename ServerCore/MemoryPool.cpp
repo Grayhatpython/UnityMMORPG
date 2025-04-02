@@ -27,7 +27,7 @@ MemoryHeader* MemoryPool::Pop()
 {
 	MemoryHeader* memory = static_cast<MemoryHeader*>(::InterlockedPopEntrySList(&_header));
 
-	// ¾øÀ¸¸é »õ·Î ¸¸µé´Ù
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (memory == nullptr)
 	{
 		memory = reinterpret_cast<MemoryHeader*>(::_aligned_malloc(_allocSize, SLIST_ALIGNMENT));
@@ -97,7 +97,7 @@ void* Memory::Allocate(int32 size)
 
 	if (memorySize > MAX_ALLOC_SIZE)
 	{
-		// ¸Þ¸ð¸® Ç®¸µ ÃÖ´ë Å©±â¸¦ ¹þ¾î³ª¸é ÀÏ¹Ý ÇÒ´ç
+		// ï¿½Þ¸ï¿½ Ç®ï¿½ï¿½ ï¿½Ö´ï¿½ Å©ï¿½â¸¦ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½Ï¹ï¿½ ï¿½Ò´ï¿½
 		header = reinterpret_cast<MemoryHeader*>(::_aligned_malloc(memorySize, SLIST_ALIGNMENT));
 	}
 	else
@@ -110,7 +110,7 @@ void* Memory::Allocate(int32 size)
 			{
 				for (int i = 0; i < ThreadCacheMemory::MEMORY_BLOCK_REQUEST_CHUNK_SIZE; i++)
 				{
-					// ¸Þ¸ð¸® Ç®¿¡¼­ ²¨³»¿Â´Ù
+					// ï¿½Þ¸ï¿½ Ç®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½
 					header = _poolTable[allocSize]->Pop();
 					LThreadCacheMemory->Push(allocSize, header);
 				}
@@ -119,7 +119,7 @@ void* Memory::Allocate(int32 size)
 			header = LThreadCacheMemory->Pop(allocSize);
 		}
 		else
-			// ¸Þ¸ð¸® Ç®¿¡¼­ ²¨³»¿Â´Ù
+			// ï¿½Þ¸ï¿½ Ç®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½
 			header = _poolTable[allocSize]->Pop();
 	}
 
@@ -135,7 +135,7 @@ void Memory::Release(void* ptr)
 
 	if (memorySize > MAX_ALLOC_SIZE)
 	{
-		// ¸Þ¸ð¸® Ç®¸µ ÃÖ´ë Å©±â¸¦ ¹þ¾î³ª¸é ÀÏ¹Ý ÇØÁ¦
+		// ï¿½Þ¸ï¿½ Ç®ï¿½ï¿½ ï¿½Ö´ï¿½ Å©ï¿½â¸¦ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½Ï¹ï¿½ ï¿½ï¿½ï¿½ï¿½
 		::_aligned_free(header);
 	}
 	else
@@ -145,7 +145,7 @@ void Memory::Release(void* ptr)
 		if(LThreadCacheMemory)
 			LThreadCacheMemory->Push(allocSize, header);
 		else
-		//	 ¸Þ¸ð¸® Ç®¿¡ ¹Ý³³ÇÑ´Ù
+		//	 ï¿½Þ¸ï¿½ Ç®ï¿½ï¿½ ï¿½Ý³ï¿½ï¿½Ñ´ï¿½
 			_poolTable[allocSize]->Push(header);
 	}
 }

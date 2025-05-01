@@ -9,5 +9,5 @@ void* Allocator::Allocate(uint32 size)
 
 void Allocator::Deallocate(void* ptr)
 {
-	GMemoryPool->Release(ptr);
+	GMemoryPool->Deallocate(ptr);
 }

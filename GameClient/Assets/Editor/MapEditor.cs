@@ -20,6 +20,7 @@ public class MapEditor
 
     private static void GenerateMap(string path)
     {
+        /*
         GameObject go = GameObject.Find("World");
 
         if (go == null)
@@ -55,6 +56,7 @@ public class MapEditor
                 writer.WriteLine();
             }
         }
+        */
     }
 
 #endif

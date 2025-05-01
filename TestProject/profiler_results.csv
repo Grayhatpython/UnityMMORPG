@@ -1,0 +1,21 @@
+Function Name,Call Count,Total(レs),Average(レs),min(レs),max(レs),threadID,Depth,CallStack
+SubTask,500,3722572,7445,3,15986,25896,3,MainScope -> MainThreadTask -> ProcessData
+MainScope,1,4796344,4796344,4796344,4796344,25896,0,
+MainThreadTask,10,4790312,479031,271582,630907,25896,1,MainScope
+ProcessData,10,3737835,373783,166987,525876,25896,2,MainScope -> MainThreadTask
+DoHeavyCalculation,3,219427,73142,68976,80168,2932,1,WorkerThread_0
+WorkerThread_0,1,1953698,1953698,1953698,1953698,2932,0,
+ProcessData,2,1640890,820445,647979,992911,2932,1,WorkerThread_0
+SubTask,200,1634966,8174,5,15641,2932,2,WorkerThread_0 -> ProcessData
+WorkerThread_1,1,1878386,1878386,1878386,1878386,21220,0,
+DoHeavyCalculation,3,230533,76844,69217,83513,21220,1,WorkerThread_1
+ProcessData,2,1551385,775692,483626,1067759,21220,1,WorkerThread_1
+SubTask,200,1545766,7728,5,15630,21220,2,WorkerThread_1 -> ProcessData
+WorkerThread_2,1,1893422,1893422,1893422,1893422,21176,0,
+DoHeavyCalculation,3,215560,71853,69338,76086,21176,1,WorkerThread_2
+ProcessData,2,1596331,798165,662981,933350,21176,1,WorkerThread_2
+SubTask,200,1590358,7951,5,15506,21176,2,WorkerThread_2 -> ProcessData
+WorkerThread_3,1,1863338,1863338,1863338,1863338,4632,0,
+DoHeavyCalculation,3,234536,78178,69629,83072,4632,1,WorkerThread_3
+ProcessData,2,1535924,767962,498149,1037775,4632,1,WorkerThread_3
+SubTask,200,1530125,7650,7,15647,4632,2,WorkerThread_3 -> ProcessData

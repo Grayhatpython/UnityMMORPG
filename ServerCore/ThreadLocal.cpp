@@ -7,5 +7,4 @@ thread_local SendBufferChunkRef		LSendBufferChunk;
 thread_local JobQueueBasedObject*	LCurrentExecuteJobQueue = nullptr;
 thread_local ThreadSpinCount		LThreadSpinCount;
 
-thread_local ThreadCacheMemory*		LThreadCacheMemory = nullptr;
 thread_local std::vector<ThreadCallStackInfo>* LThreadCallStackInfo;

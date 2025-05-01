@@ -16,12 +16,12 @@ public:
 	void Render();
 
 private:
-	void ReenderTimeline();
-	void RenderThreadsInfo();
-	void RenderFramesInfo();
-	void RenderEventsInfo();
-	void RenderFilters();
 	void RenderControls();
+	void RenderFilters();
+	void RenderTimeline();
+	void RenderThreadsInfo();
+	void RenderEventsInfo();
+	void RenderFramesInfo();
 
 	bool		SelectEvent(float x, float y);
 	std::string TimeToString(uint64 microseconds) const; 

@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PacketGenerator", "Tools\Pa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MonitoringServer", "MonitoringServer\MonitoringServer.vcxproj", "{631B3056-169D-4612-BB96-8A9ADB9674EB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProject", "TestProject\TestProject.vcxproj", "{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,18 @@ Global
 		{631B3056-169D-4612-BB96-8A9ADB9674EB}.Release|x64.Build.0 = Release|x64
 		{631B3056-169D-4612-BB96-8A9ADB9674EB}.Release|x86.ActiveCfg = Release|Win32
 		{631B3056-169D-4612-BB96-8A9ADB9674EB}.Release|x86.Build.0 = Release|Win32
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Debug|Any CPU.Build.0 = Debug|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Debug|x64.ActiveCfg = Debug|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Debug|x64.Build.0 = Debug|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Debug|x86.ActiveCfg = Debug|Win32
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Debug|x86.Build.0 = Debug|Win32
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Release|Any CPU.ActiveCfg = Release|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Release|Any CPU.Build.0 = Release|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Release|x64.ActiveCfg = Release|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Release|x64.Build.0 = Release|x64
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Release|x86.ActiveCfg = Release|Win32
+		{A7ABA0EB-A8B5-4834-B19C-86E73599D7AE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

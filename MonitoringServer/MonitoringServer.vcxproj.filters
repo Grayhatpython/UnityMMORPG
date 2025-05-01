@@ -7,6 +7,9 @@
     <Filter Include="Imgui">
       <UniqueIdentifier>{21135134-bee5-4c47-a180-e14bbb4df303}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{d7aeeb8a-5b76-4686-83ed-00eee4aec908}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -53,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomMemoryPool.cpp">
+      <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="imgui\imstb_textedit.h">
       <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomMemoryPool.h">
+      <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

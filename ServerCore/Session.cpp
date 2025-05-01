@@ -31,20 +31,13 @@ void Session::Send(SendBufferRef sendBuffer)
 
 	bool isSendRegistered = false;
 
-	//	현재 RegisterSend가 걸리지 않은 상태라면 걸어준다.
-	//	Send 순서를 지키기 위해
-	//{
-	//	WRITE_LOCK;
-
-	//	//	sendBuffer 들을 쌓아 놓는 Queue
-	//	_sendBufferQueue.push(sendBuffer);
-
-	//	if (_isSendRegistered.exchange(true) == false)
-	//		isSendRegistered = true;
-	//}
-
+		//현재 RegisterSend가 걸리지 않은 상태라면 걸어준다.
+		//Send 순서를 지키기 위해
 	{
-		_lockFreeSendBufferQueue.enqueue(sendBuffer);
+		WRITE_LOCK;
+
+		//	sendBuffer 들을 쌓아 놓는 Queue
+		_sendBufferQueue.push(sendBuffer);
 
 		if (_isSendRegistered.exchange(true) == false)
 			isSendRegistered = true;
@@ -232,31 +225,21 @@ void Session::RegisterSend()
 	//	Session마다 가지고 있는 sessionBufferQueue에 Push한다.
 	//	그리고 RegisterSend를 담당하는 스레드에서 sessionBufferQueue 에 쌓인
 	//	SendBuffer들을 _sendEvent에 sendBuffers로 Push한다.
-	//{
-	//	WRITE_LOCK;
-
-	//	int32 writeSize = 0;
-	//	while (_sendBufferQueue.empty() == false)
-	//	{
-	//		SendBufferRef sendBuffer = _sendBufferQueue.front();
-
-	//		//	너무 많은 데이터를 송신 할 수 있으므로 
-	//		//	제한을 걸거나 할 때 사용하자
-	//		writeSize += sendBuffer->WriteSize();
-
-	//		_sendBufferQueue.pop();
-	//		_sendEvent.sendBuffers.push_back(sendBuffer);
-	//	}
-	//}
-
 	{
-		size_t approxSize = _lockFreeSendBufferQueue.size_approx();  // 현재 큐 크기 가져오기
-		Vector<SendBufferRef> sendBuffers(approxSize);
+		WRITE_LOCK;
 
-		size_t count = _lockFreeSendBufferQueue.try_dequeue_bulk(sendBuffers.begin(), sendBuffers.size());  // 대략적인 개수만큼 dequeue
+		int32 writeSize = 0;
+		while (_sendBufferQueue.empty() == false)
+		{
+			SendBufferRef sendBuffer = _sendBufferQueue.front();
 
-		for (size_t i = 0; i < count; ++i) 
-			_sendEvent.sendBuffers.push_back(sendBuffers[i]);
+			//	너무 많은 데이터를 송신 할 수 있으므로 
+			//	제한을 걸거나 할 때 사용하자
+			writeSize += sendBuffer->WriteSize();
+
+			_sendBufferQueue.pop();
+			_sendEvent.sendBuffers.push_back(sendBuffer);
+		}
 	}
 
 	//	모아서 보내기

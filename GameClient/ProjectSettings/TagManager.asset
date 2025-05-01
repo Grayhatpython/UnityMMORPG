@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Hitbox
   layers:
   - Default
   - TransparentFX
@@ -16,10 +17,10 @@ TagManager:
   - Monster
   - Wall
   - 
-  - 
-  - 
-  - 
-  - 
+  - Player
+  - Knight
+  - PlayerHitbox
+  - KnightHitbox
   - 
   - 
   - 

@@ -1,7 +1,7 @@
 #pragma once
 
 extern class ThreadManager*		GThreadManager;
-extern class Memory*			GMemoryPool;
+extern class GlobalMemoryPool*		GMemoryPool;
 extern class SendBufferManager* GSendBufferManager;
 extern class GlobalQueue*		GGlobalQueue;
 extern class JobTimer*			GJobTimer;

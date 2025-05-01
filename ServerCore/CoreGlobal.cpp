@@ -9,7 +9,7 @@
 #include "Log.h"
 
 ThreadManager*		GThreadManager = nullptr;
-Memory*				GMemoryPool = nullptr;
+GlobalMemoryPool*		GMemoryPool = nullptr;
 SendBufferManager*	GSendBufferManager = nullptr;
 GlobalQueue*		GGlobalQueue = nullptr;
 JobTimer*			GJobTimer = nullptr;
@@ -24,7 +24,7 @@ CoreGlobal::CoreGlobal()
 	SocketUtils::Init();
 	GThreadHistory = new ThreadHistory();
 	GThreadManager = new ThreadManager();
-	GMemoryPool = new Memory();
+	GMemoryPool = new GlobalMemoryPool();
 	GSendBufferManager = new SendBufferManager();
 	GGlobalQueue = new GlobalQueue();
 	GJobTimer = new JobTimer();
@@ -69,6 +69,8 @@ void CoreGlobal::Clear()
 	}
 	if (GMemoryPool)
 	{
+		GMemoryPool->Clear();
+
 		delete GMemoryPool;
 		GMemoryPool = nullptr;
 	}

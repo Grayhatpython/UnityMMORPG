@@ -1,3 +1,16 @@
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
+#include "Profiler.h"
 #include "pch.h"
 #include "Profiler.h"
 #include <random>
@@ -22,7 +35,7 @@ Profiler::Profiler()
 	_categoryColors["Default"] = defaultColor;
 	_categoryColors["Functions"] = functionColor;
 
-	_threadFilters["Main"] = true;
+	//_threadFilters["Main"] = true;
 	_categoryFilters["Render"] = true;
 	_categoryFilters["Compute"] = true;
 	_categoryFilters["IO"] = true;
@@ -92,8 +105,9 @@ void Profiler::EndEvent(const std::string& name)
 			ProfileEvent event = *it;
 			event.endTime = GetCurrentTimestamp();	
 
-			if(event.endTime - event.startTime < _pauseThreshold)
-				_isPaused = true;
+			//	TODO
+			//if(event.endTime - event.startTime > _pauseThreshold)
+				//_isPaused = true;
 
 			int32 threadIndex = GetThreadIndex(threadID);	
 			_threadsInfo[threadIndex].events.push_back(event);
@@ -179,6 +193,7 @@ void Profiler::Stop()
 	_isPaused = false;	
 }
 
+
 void Profiler::Reset()
 {
 	std::lock_guard<std::mutex> lock(_lock);
@@ -193,6 +208,8 @@ void Profiler::Reset()
 		_isPaused = false;
 	}
 }
+
+
 
 uint64 Profiler::GetCurrentTimestamp() const
 {

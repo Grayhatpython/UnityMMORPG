@@ -3,7 +3,6 @@
 #include "IocpEvent.h"
 #include "NetAddress.h"
 #include "RecvBuffer.h"
-#include "concurrentqueue.h"
 
 /*--------------
 	Session
@@ -84,7 +83,6 @@ private:
 	RecvBuffer				_recvBuffer;
 
 	Queue<SendBufferRef>						_sendBufferQueue;
-	moodycamel::ConcurrentQueue<SendBufferRef>	_lockFreeSendBufferQueue;
 	Atomic<bool>								_isSendRegistered = false;
 
 private:

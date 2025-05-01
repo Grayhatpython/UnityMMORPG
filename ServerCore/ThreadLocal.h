@@ -8,5 +8,4 @@ extern thread_local SendBufferChunkRef							LSendBufferChunk;
 extern thread_local class JobQueueBasedObject*					LCurrentExecuteJobQueue;
 extern thread_local struct ThreadSpinCount								LThreadSpinCount;
 
-extern thread_local class ThreadCacheMemory*					LThreadCacheMemory;
 extern thread_local std::vector<struct ThreadCallStackInfo>*	LThreadCallStackInfo;

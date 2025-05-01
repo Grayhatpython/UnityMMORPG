@@ -49,7 +49,6 @@ void ThreadManager::InitTLS()
 	static Atomic<uint32> SThreadId = 1;
 	LThreadId = SThreadId.fetch_add(1);
 
-	LThreadCacheMemory = new ThreadCacheMemory();
 	LThreadCallStackInfo = new std::vector<ThreadCallStackInfo>();
 }
 
@@ -60,11 +59,8 @@ void ThreadManager::DestroyTLS()
 		delete LThreadCallStackInfo;
 		LThreadCallStackInfo = nullptr;
 	}
-	if (LThreadCacheMemory)
-	{
-		delete LThreadCacheMemory;
-		LThreadCacheMemory = nullptr;
-	}
+	
+	GlobalMemoryPool::ThreadLocalCacheClear();
 }
 
 void ThreadManager::DoGlobalJobQueueExecute()

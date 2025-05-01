@@ -26,6 +26,117 @@ GameServer* gameServer;
 //	}
 //}
 
+// 다양한 크기의 테스트 클래스
+class SmallObject {
+	int32 data;
+public:
+	SmallObject(int32 d = 0) : data(d) { }
+	~SmallObject()
+	{
+		
+	}
+	int32 getValue() const { return data; }
+};
+
+class MediumObject {
+	int data[32];  // 약 128바이트
+public:
+	MediumObject(int d = 0) {
+		for (int i = 0; i < 32; ++i) data[i] = d + i;
+	}
+	int getValue() const {
+		int sum = 0;
+		for (int i = 0; i < 32; ++i) sum += data[i];
+		return sum;
+	}
+};
+
+class LargeObject {
+	int data[256];  // 약 1024바이트
+public:
+	LargeObject(int d = 0) {
+		for (int i = 0; i < 256; ++i) data[i] = d + i;
+	}
+	int getValue() const {
+		int sum = 0;
+		for (int i = 0; i < 256; ++i) sum += data[i];
+		return sum;
+	}
+};
+
+// 멀티스레드 테스트
+void threadFunction(int id, int iterations) {
+	std::cout << "스레드 " << id << " 시작\n";
+
+	for (int i = 0; i < iterations; ++i) {
+		// 다양한 객체 할당 테스트
+		auto smallPtr = cnew<SmallObject>(i);
+		auto mediumPtr = cnew<MediumObject>(i);
+		auto largePtr = cnew<LargeObject>(i);
+
+		// 잠시 사용
+		int result = smallPtr->getValue() + mediumPtr->getValue() + largePtr->getValue();
+
+		// 해제
+		cdelete(smallPtr);
+		cdelete(mediumPtr);
+		cdelete(largePtr);
+
+		// 스마트 포인터 테스트
+		auto sharedSmall = MakeShared<SmallObject>(i);
+		auto sharedMedium = MakeShared<MediumObject>(i);
+	}
+
+	std::cout << "스레드 " << id << " 종료\n";
+}
+
+
+int main()
+{
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	{
+		auto size = sizeof(SmallObject);
+		auto small = ObjectPool<SmallObject>::Pop(3);
+		ObjectPool<SmallObject>::Push(small);
+
+	}
+
+	{
+		auto small = ObjectPool<SmallObject>::MakeShared(3);
+	}
+
+	std::cout << "글로벌 메모리 풀 테스트 시작\n";
+
+	const int NUM_THREADS = 4;
+	const int ITERATIONS_PER_THREAD = 1000000;
+
+	// 멀티스레딩 테스트
+	std::cout << "\n멀티스레딩 테스트 시작 (" << NUM_THREADS << " 스레드, 각 "
+		<< ITERATIONS_PER_THREAD << " 반복)...\n";
+
+	std::vector<std::thread> threads;
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	for (int i = 0; i < NUM_THREADS; ++i) {
+		threads.emplace_back(threadFunction, i, ITERATIONS_PER_THREAD);
+	}
+
+	for (auto& t : threads) {
+		t.join();
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = end - start;
+
+	std::cout << "멀티스레딩 테스트 완료: " << elapsed.count() << "초\n";
+
+	return 0;
+}
+
+/*
+
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -39,7 +150,7 @@ int main()
 
 	//	Exit Function Callback Register
 	/*BOOL successd = SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE);
-	ASSERT_CRASH(successd);*/
+	ASSERT_CRASH(successd);
 
 
 	{
@@ -59,7 +170,7 @@ int main()
 }
 
 
-/*
+
 {
 	//	DB Test
 	ASSERT_CRASH(GDBConnectionPool->Connect(1, L"Driver={ODBC Driver 17 for SQL Server};server=(localdb)\\MSSQLLocalDB;database=GameServerDb;trusted_connection=Yes;"));

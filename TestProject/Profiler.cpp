@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <ctime>
 
+Profiler GProfiler;
+
 thread_local ThreadProfileData* Profiler::S_LThreadProfileData = nullptr;
 
 Profiler::Profiler()
@@ -63,14 +65,14 @@ void Profiler::Begin(const std::string& name, const char* filePath, int32_t line
 
 	//	각 Thread_local Thread Profile Data
 	auto threadProfileData = GetThreadProfileData();
-	auto pointProfileDatas = threadProfileData->pointProfilerDatas.load();
+	threadProfileData->threadProfileDataLock.lock();
 
 	//	Max Call Stack Depth 보다 작으면 Thread_local Thread Profile Data CallStack에 현재 depth에 name 저장
 	if (threadProfileData->currentDepth < S_MAX_CALL_STACK_DEPTH)
 		threadProfileData->callStack[threadProfileData->currentDepth] = name;
 
 	//	현재 name에 대한 ProfileData 설정
-	auto& profileData = (*pointProfileDatas)[name];
+	auto& profileData = (*threadProfileData->bufferPointer)[name];
 	profileData.startTime = std::chrono::high_resolution_clock::now();
 	profileData.callStackDepth = threadProfileData->currentDepth;
 	profileData.callCount++;
@@ -87,24 +89,25 @@ void Profiler::End(const std::string& name)
 
 	//	각 Thread_local Thread Profile Data
 	auto threadProfileData = GetThreadProfileData();
-	auto pointProfileDatas = threadProfileData->pointProfilerDatas.load();
 
 	//	Call Stack Depth 감소
 	if (threadProfileData->currentDepth > 0)
 		threadProfileData->currentDepth--;
 
 	//	name에 대한 Profile Data가 없다면?..
-	auto it = pointProfileDatas->find(name);
-	if (it == pointProfileDatas->end())
+	auto it = (*threadProfileData->bufferPointer).find(name);
+	if (it == (*threadProfileData->bufferPointer).end())
 		return;
 
 	//	name에 대한 Profile Data 설정
-	auto profileData = it->second;
+	auto& profileData = it->second;
 	profileData.endTime = std::chrono::high_resolution_clock::now();
 	profileData.durationTime = std::chrono::duration_cast<std::chrono::microseconds>(profileData.endTime - profileData.startTime);
 	profileData.totalTime += profileData.durationTime;
 	profileData.minDurationTime = std::min(profileData.minDurationTime, profileData.durationTime);
 	profileData.maxDurationTime = std::max(profileData.maxDurationTime, profileData.durationTime);
+
+	threadProfileData->threadProfileDataLock.unlock();
 }
 
 void Profiler::Start()
@@ -147,32 +150,44 @@ void Profiler::Reset()
 	for (auto threadProfileData : _threadProfileDatas)
 	{
 		if (threadProfileData)
-		{
-			threadProfileData->readProfileDatas.clear();
-			threadProfileData->writeProfileDatas.clear();
-			threadProfileData->currentDepth = 0;
-		}
+			threadProfileData->Clear();
 	}
 }
 
 void Profiler::Print()
 {
-	std::vector<std::pair<std::string, ProfileData>> profileDatas;
+	//	_threadProfileDatas에 대한 Lock
+	std::lock_guard<std::mutex> lock(_threadProfileLock);
 
 	for (auto threadProfileData : _threadProfileDatas)
 	{
-		auto pointProfileDatas = threadProfileData->pointProfilerDatas.load();
+		std::unordered_map<std::string, ProfileData>* readProfileDatesBuffer = nullptr;
 
-		//	타이밍이슈가 있다 무조건!!
-		auto readProfieDatas = (pointProfileDatas == &threadProfileData->readProfileDatas) ? &threadProfileData->writeProfileDatas : &threadProfileData->readProfileDatas;
-
-		for (const auto& [name, data] : *readProfieDatas)
 		{
-			profileDatas.emplace_back(name, data);
+			//	각 스레드가 ProfileData를 기록중일 때는 Race Condition 피하기 위해 OutputThread는 기다린다.
+			//	문제는 해당하는 스레드가 함수호출이 길어지면 로그가 밀리는 현상발생...
+			//	그리고 해당하는 스레드가 중접 함수 호출 경우도 지금 같은 경우 recursive_mutex을 사용하여
+			//	최초 호출한 함수가 recursive_mutex을 unlock 하지 않는 이상 기다린다..
+			//	대부분 호출시간이 짧아서 괜찮을거 같다만 길찾기나 Ai나 Broadcast 코드부분에서 발생할수도 있다.
+			//	그리고 output interval이 1000ms인데 위에서 얘기한데로 더 늦게 출력될수도 있다.
+			// 
+			//	그리고 중첩 함수 호출 중간에 로그를 안전하게 출력하면서 데이터를 유지하는 방법을 좀 생각해봐야겠다.
+			//	중첩함수 호출같은 경우 중간에 함수가 어느정도 시간이 걸리는지 or Output Interval이 중첩함수 호출중간에 
+			//	시간이 될 수 도 있기때문이다.
+			threadProfileData->threadProfileDataLock.lock();
+
+			//	포인터를 스왑하는 찰나의 순간만 Lock을 획득한다.
+			//	writeBuffer Swap 하면서 readBuffer를 구해온다 -> readBuffer는 쓰기 없이 읽기만 하므로 Lock이 접근 가능
+			threadProfileData->SwapProfileDatesBuffer(&readProfileDatesBuffer);
+
+			threadProfileData->threadProfileDataLock.unlock();
 		}
+
 	}
 
+	//	writeBuffer Swap으로 인해서 
 	std::ostringstream oss;
+	std::cout << "Test" << std::endl;
 }
 
 std::string Profiler::GetCallStack()
@@ -183,7 +198,7 @@ std::string Profiler::GetCallStack()
 
 	std::string callStack;
 
-	for (auto i = 0; i < threadProfileData->currentDepth; ++i)
+	for (uint32_t i = 0; i < threadProfileData->currentDepth; ++i)
 	{
 		if (i > 0)
 			callStack += " -> ";
@@ -207,21 +222,8 @@ void Profiler::OutputThreadUpdate()
 			if (predicateTriggered)
 				_shouldOutputNow.store(false); // 출력 후 상태 초기화
 
-			SwapThreadProfileDatasBuffer();
 			Print();
 		}
-	}
-}
-
-void Profiler::SwapThreadProfileDatasBuffer()
-{
-	for (auto threadProfileData : _threadProfileDatas)
-	{
-		auto currentProfileDatas = threadProfileData->pointProfilerDatas.load();
-		auto swapProfileDatas = (currentProfileDatas == &threadProfileData->readProfileDatas) ? &threadProfileData->writeProfileDatas : &threadProfileData->readProfileDatas;
-
-		swapProfileDatas->clear();
-		threadProfileData->pointProfilerDatas.store(swapProfileDatas);
 	}
 }
 

@@ -122,7 +122,6 @@
 //	return 0;
 //}
 
-
 #include "pch.h"
 #include "Profiler.h"
 #include <iostream>
@@ -133,7 +132,7 @@
 // 테스트용 작업 함수들
 void DoHeavyCalculation()
 {
-    CUSTOM_PROFILE_FUNCTION();
+    ScopedProfiler s("DoHeavyCalculation", __FUNCTION__, __LINE__);
 
     // 무거운 계산 시뮬레이션
     std::random_device rd;
@@ -147,98 +146,98 @@ void DoHeavyCalculation()
     }
 }
 
-void ProcessData(int size)
-{
-    CUSTOM_PROFILE_FUNCTION();
-
-    // 일부 데이터 처리 시뮬레이션
-    for (int i = 0; i < size; ++i)
-    {
-        // 간단한 계산
-        if (i % 100 == 0)
-        {
-            CUSTOM_PROFILE_SCOPE("SubTask");
-            std::this_thread::sleep_for(std::chrono::microseconds(1));
-        }
-    }
-}
-
-void WorkerThread(int id, int iterations)
-{
-    // 스레드 작업 이름 생성
-    std::string threadName = "WorkerThread_" + std::to_string(id);
-    CUSTOM_PROFILE_SCOPE(threadName);
-
-    for (int i = 0; i < iterations; ++i)
-    {
-        if (i % 2 == 0)
-        {
-            DoHeavyCalculation();
-        }
-        else
-        {
-            ProcessData(10000);
-        }
-
-        // 약간의 휴식
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
-}
+//void ProcessData(int size)
+//{
+//    CUSTOM_PROFILE_FUNCTION();
+//
+//    // 일부 데이터 처리 시뮬레이션
+//    for (int i = 0; i < size; ++i)
+//    {
+//        // 간단한 계산
+//        if (i % 100 == 0)
+//        {
+//            CUSTOM_PROFILE_SCOPE("SubTask");
+//            std::this_thread::sleep_for(std::chrono::microseconds(1));
+//        }
+//    }
+//}
+//
+//void WorkerThread(int id, int iterations)
+//{
+//    // 스레드 작업 이름 생성
+//    std::string threadName = "WorkerThread_" + std::to_string(id);
+//    CUSTOM_PROFILE_SCOPE(threadName);
+//
+//    for (int i = 0; i < iterations; ++i)
+//    {
+//        if (i % 2 == 0)
+//        {
+//            DoHeavyCalculation();
+//        }
+//        else
+//        {
+//            ProcessData(10000);
+//        }
+//
+//        // 약간의 휴식
+//        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+//    }
+//}
 
 int main()
 {
     setlocale(LC_ALL, "");
 
     // 프로파일러 설정
-    CustomProfiler::GetInstance().Configure(
-        CustomProfiler::OutputMode::BOTH,   // 콘솔과 파일 모두에 출력
-        2000,                               // 2초마다 출력
+    GProfiler.Initialize(
+        OutputMode::Both,   // 콘솔과 파일 모두에 출력
+        1000,                               // 2초마다 출력
         "profiler_demo.log"                 // 로그 파일 이름
     );
 
     // 프로파일링 시작
-    CustomProfiler::GetInstance().Start();
+    GProfiler.Start();
 
     {
-        CUSTOM_PROFILE_SCOPE("MainScope");
+        ScopedProfiler s("main", __FUNCTION__, __LINE__);
 
         std::cout << "프로파일러 테스트 시작..." << std::endl;
 
         // 여러 스레드 생성
-        std::vector<std::thread> threads;
-        const int threadCount = 4;
-        const int iterationsPerThread = 5;
+        //std::vector<std::thread> threads;
+        //const int threadCount = 4;
+        //const int iterationsPerThread = 5;
 
-        for (int i = 0; i < threadCount; ++i)
-        {
-            threads.emplace_back(WorkerThread, i, iterationsPerThread);
-        }
+        //for (int i = 0; i < threadCount; ++i)
+        //{
+        //    threads.emplace_back(WorkerThread, i, iterationsPerThread);
+        //}
 
         // 메인 스레드에서도 일부 작업 수행
         for (int i = 0; i < 10; ++i)
         {
-            CUSTOM_PROFILE_SCOPE("MainThreadTask");
-            ProcessData(5000);
+            ScopedProfiler s("MainThreadTask", __FUNCTION__, __LINE__);
+            //ProcessData(5000);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
-        // 모든 스레드 조인
-        for (auto& thread : threads)
-        {
-            thread.join();
-        }
+        //// 모든 스레드 조인
+        //for (auto& thread : threads)
+        //{
+        //    thread.join();
+        //}
 
         std::cout << "모든 작업 완료" << std::endl;
     }
 
     // 프로파일링 중지 및 최종 결과 출력
-    CustomProfiler::GetInstance().Stop();
+    GProfiler.Stop();
 
-    // CSV로 결과 내보내기
-    if (CustomProfiler::GetInstance().ExportToCSV("profiler_results.csv"))
-    {
-        std::cout << "CSV 파일로 결과 내보내기 성공" << std::endl;
-    }
+    //// CSV로 결과 내보내기
+    //if (CustomProfiler::GetInstance().ExportToCSV("profiler_results.csv"))
+    //{
+    //    std::cout << "CSV 파일로 결과 내보내기 성공" << std::endl;
+    //}
 
     return 0;
 }

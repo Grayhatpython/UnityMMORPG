@@ -65,17 +65,48 @@ struct ThreadProfileData
 {
 	ThreadProfileData()
 	{
-		pointProfilerDatas.store(&readProfileDatas);
+		bufferPointer.store(&writeProfileDatesBuffer);
 	}
+
+	void SwapProfileDatesBuffer(std::unordered_map<std::string, ProfileData>** outReadProfileDatesBuffer)
+	{
+		//	현재 bufferPointer 즉, writeBuffer가 writeProfileDatesBuffer이면
+		//	writeProfileDatesBuffer -> outReadProfileDatesBuffer로 즉 출력을 위한 ReadBuffer로
+		//	bufferPointer 즉, writeBuffer를 readProfileDatesBuffer로 Swap
+		if (bufferPointer == &writeProfileDatesBuffer)
+		{
+			*outReadProfileDatesBuffer = &writeProfileDatesBuffer;
+			bufferPointer = &readProfileDatesBuffer;
+		}
+		//	현재 bufferPointer 즉, writeBuffer가 readProfileDatesBuffer이면
+		//	readProfileDatesBuffer -> outReadProfileDatesBuffer로 즉 출력을 위한 ReadBuffer로
+		//	bufferPointer 즉, writeBuffer를 writeProfileDatesBuffer로 Swap
+		else
+		{
+			*outReadProfileDatesBuffer = &readProfileDatesBuffer;
+			bufferPointer = &writeProfileDatesBuffer;
+		}
+	}
+
+	void Clear()
+	{
+		currentDepth = 0;
+
+		readProfileDatesBuffer.clear();
+		writeProfileDatesBuffer.clear();
+
+		bufferPointer.store(&writeProfileDatesBuffer);
+	}
+
+	std::recursive_mutex threadProfileDataLock;
 
 	uint32_t currentDepth = 0;
 	std::array<std::string, S_MAX_CALL_STACK_DEPTH> callStack;
 	
-	std::unordered_map<std::string, ProfileData> readProfileDatas;
-	std::unordered_map<std::string, ProfileData> writeProfileDatas;
-
-	std::atomic<std::unordered_map<std::string, ProfileData>*> pointProfilerDatas;
-
+	std::unordered_map<std::string, ProfileData> readProfileDatesBuffer;
+	std::unordered_map<std::string, ProfileData> writeProfileDatesBuffer;
+	std::atomic<std::unordered_map<std::string, ProfileData>*> bufferPointer;
+	
 };
 
 class Profiler
@@ -92,7 +123,7 @@ public:
 		outputIntervalMilliseconds : 출력 인터벌 ( Milliseconds 기준 ) 
 		fileName : 출력 파일 이름
 	*/
-	void Initialize(OutputMode outputMode = OutputMode::Console, uint16_t outputIntervalMilliseconds = 5000, const std::string& fileName = "Profile.log");
+	void Initialize(OutputMode outputMode = OutputMode::Console, uint16_t outputIntervalMilliseconds = 1000, const std::string& fileName = "Profile.log");
 
 	/*
 		프로파일링 시작
@@ -128,8 +159,6 @@ public:
 private:
 	//	출력 스레드 업데이트 함수
 	void				OutputThreadUpdate();
-	
-	void				SwapThreadProfileDatasBuffer();
 
 private:
 	//	스레드 프로파일 데이터 
@@ -156,10 +185,12 @@ private:
 
 	//	출력 관련 설정
 	OutputMode		_outputMode = OutputMode::Console;
-	uint32_t		_outputIntervalMilliseconds = 5000;
+	uint32_t		_outputIntervalMilliseconds = 1000;
 	std::string		_outputFileName = "Profile.log";
 	std::ofstream	_outputFile;
 };
+
+extern Profiler GProfiler;
 
 // RAII(Resource Acquisition Is Initialization) 기반의 스코프 프로파일러
 // 객체가 선언된 스코프(범위)를 벗어날 때 자동으로 프로파일링을 종료하고 결과를 기록합니다.
@@ -169,13 +200,14 @@ public:
 	ScopedProfiler(const std::string& name, const char* filePath, int32_t lineNumber)
 		: _name(name)
 	{
-
+		GProfiler.Begin(_name, filePath, lineNumber);
 	}
 	~ScopedProfiler()
 	{
-
+		GProfiler.End(_name);
 	}
 
 private:
 	std::string _name;
 };
+
